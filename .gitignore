@@ -1,0 +1,29 @@
+# Xcode
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcuserdata
+**/xcuserdata/
+
+# CocoaPods
+Pods/
+Podfile.lock
+.superpowers/
+
+# Build
+build/
+*.o
+*.LinkFileList
+
+# macOS
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# IDE
+*.swp
+*~.nib

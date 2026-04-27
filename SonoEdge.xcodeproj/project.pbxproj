@@ -1,0 +1,477 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6E277F47761C5DEC9D7CE887 /* Pods_SonoEdge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 309EAA0C40014F8BC44E6F35 /* Pods_SonoEdge.framework */; };
+		CB16B0FC2F9E79EC0087EAE9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */; };
+		CB16B0FD2F9E79EC0087EAE9 /* SonoEdgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */; };
+		CB16B0FE2F9E79EC0087EAE9 /* AudioProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F12F9E79EC0087EAE9 /* AudioProcessor.swift */; };
+		CB16B0FF2F9E79EC0087EAE9 /* BLERecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F22F9E79EC0087EAE9 /* BLERecorder.swift */; };
+		CB16B1002F9E79EC0087EAE9 /* InferencePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F42F9E79EC0087EAE9 /* InferencePipeline.swift */; };
+		CB16B1012F9E79EC0087EAE9 /* TFLiteEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F52F9E79EC0087EAE9 /* TFLiteEngine.swift */; };
+		CB16B1022F9E79EC0087EAE9 /* heart_model_int8full.tflite in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0F72F9E79EC0087EAE9 /* heart_model_int8full.tflite */; };
+		CB16B1032F9E79EC0087EAE9 /* heart_quality_int8full.tflite in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0F82F9E79EC0087EAE9 /* heart_quality_int8full.tflite */; };
+		CB16B1042F9E79EC0087EAE9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		309EAA0C40014F8BC44E6F35 /* Pods_SonoEdge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SonoEdge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1D299AE178C01EF74652B3B /* Pods-SonoEdge.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SonoEdge.release.xcconfig"; path = "Target Support Files/Pods-SonoEdge/Pods-SonoEdge.release.xcconfig"; sourceTree = "<group>"; };
+		CB16B01F2F9E756B0087EAE9 /* SonoEdge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SonoEdge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonoEdgeApp.swift; sourceTree = "<group>"; };
+		CB16B0F12F9E79EC0087EAE9 /* AudioProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProcessor.swift; sourceTree = "<group>"; };
+		CB16B0F22F9E79EC0087EAE9 /* BLERecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLERecorder.swift; sourceTree = "<group>"; };
+		CB16B0F42F9E79EC0087EAE9 /* InferencePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferencePipeline.swift; sourceTree = "<group>"; };
+		CB16B0F52F9E79EC0087EAE9 /* TFLiteEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFLiteEngine.swift; sourceTree = "<group>"; };
+		CB16B0F72F9E79EC0087EAE9 /* heart_model_int8full.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = heart_model_int8full.tflite; sourceTree = "<group>"; };
+		CB16B0F82F9E79EC0087EAE9 /* heart_quality_int8full.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = heart_quality_int8full.tflite; sourceTree = "<group>"; };
+		CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SonoEdge.debug.xcconfig"; path = "Target Support Files/Pods-SonoEdge/Pods-SonoEdge.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CB16B01C2F9E756B0087EAE9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E277F47761C5DEC9D7CE887 /* Pods_SonoEdge.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		20D698E70E9DD70B1C1F11FE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */,
+				A1D299AE178C01EF74652B3B /* Pods-SonoEdge.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		2512F55CE5377315D4403171 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				309EAA0C40014F8BC44E6F35 /* Pods_SonoEdge.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CB16B0162F9E756B0087EAE9 = {
+			isa = PBXGroup;
+			children = (
+				CB16B0202F9E756B0087EAE9 /* Products */,
+				CB16B0FB2F9E79EC0087EAE9 /* SonoEdge */,
+				20D698E70E9DD70B1C1F11FE /* Pods */,
+				2512F55CE5377315D4403171 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		CB16B0202F9E756B0087EAE9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B01F2F9E756B0087EAE9 /* SonoEdge.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CB16B0F02F9E79EC0087EAE9 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */,
+				CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		CB16B0F32F9E79EC0087EAE9 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B0F12F9E79EC0087EAE9 /* AudioProcessor.swift */,
+				CB16B0F22F9E79EC0087EAE9 /* BLERecorder.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		CB16B0F62F9E79EC0087EAE9 /* Inference */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B0F42F9E79EC0087EAE9 /* InferencePipeline.swift */,
+				CB16B0F52F9E79EC0087EAE9 /* TFLiteEngine.swift */,
+			);
+			path = Inference;
+			sourceTree = "<group>";
+		};
+		CB16B0F92F9E79EC0087EAE9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B0F72F9E79EC0087EAE9 /* heart_model_int8full.tflite */,
+				CB16B0F82F9E79EC0087EAE9 /* heart_quality_int8full.tflite */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CB16B0FB2F9E79EC0087EAE9 /* SonoEdge */ = {
+			isa = PBXGroup;
+			children = (
+				CB16B0F02F9E79EC0087EAE9 /* App */,
+				CB16B0F32F9E79EC0087EAE9 /* Audio */,
+				CB16B0F62F9E79EC0087EAE9 /* Inference */,
+				CB16B0F92F9E79EC0087EAE9 /* Models */,
+				CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */,
+			);
+			path = SonoEdge;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CB16B01E2F9E756B0087EAE9 /* SonoEdge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CB16B02A2F9E756C0087EAE9 /* Build configuration list for PBXNativeTarget "SonoEdge" */;
+			buildPhases = (
+				8EC2054E5F1FFA5D2B720C2F /* [CP] Check Pods Manifest.lock */,
+				CB16B01B2F9E756B0087EAE9 /* Sources */,
+				CB16B01C2F9E756B0087EAE9 /* Frameworks */,
+				CB16B01D2F9E756B0087EAE9 /* Resources */,
+				0F5373A965BA2C6009ACDB96 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SonoEdge;
+			productName = SonoEdge;
+			productReference = CB16B01F2F9E756B0087EAE9 /* SonoEdge.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CB16B0172F9E756B0087EAE9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					CB16B01E2F9E756B0087EAE9 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+				};
+			};
+			buildConfigurationList = CB16B01A2F9E756B0087EAE9 /* Build configuration list for PBXProject "SonoEdge" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CB16B0162F9E756B0087EAE9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CB16B0202F9E756B0087EAE9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CB16B01E2F9E756B0087EAE9 /* SonoEdge */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CB16B01D2F9E756B0087EAE9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CB16B1022F9E79EC0087EAE9 /* heart_model_int8full.tflite in Resources */,
+				CB16B1032F9E79EC0087EAE9 /* heart_quality_int8full.tflite in Resources */,
+				CB16B1042F9E79EC0087EAE9 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0F5373A965BA2C6009ACDB96 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8EC2054E5F1FFA5D2B720C2F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SonoEdge-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CB16B01B2F9E756B0087EAE9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CB16B0FC2F9E79EC0087EAE9 /* ContentView.swift in Sources */,
+				CB16B0FD2F9E79EC0087EAE9 /* SonoEdgeApp.swift in Sources */,
+				CB16B0FE2F9E79EC0087EAE9 /* AudioProcessor.swift in Sources */,
+				CB16B0FF2F9E79EC0087EAE9 /* BLERecorder.swift in Sources */,
+				CB16B1002F9E79EC0087EAE9 /* InferencePipeline.swift in Sources */,
+				CB16B1012F9E79EC0087EAE9 /* TFLiteEngine.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CB16B0282F9E756C0087EAE9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = U8PM45K54G;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CB16B0292F9E756C0087EAE9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = U8PM45K54G;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CB16B02B2F9E756C0087EAE9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8PM45K54G;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuruijing.SonoEdge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CB16B02C2F9E756C0087EAE9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1D299AE178C01EF74652B3B /* Pods-SonoEdge.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8PM45K54G;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuruijing.SonoEdge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CB16B01A2F9E756B0087EAE9 /* Build configuration list for PBXProject "SonoEdge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CB16B0282F9E756C0087EAE9 /* Debug */,
+				CB16B0292F9E756C0087EAE9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CB16B02A2F9E756C0087EAE9 /* Build configuration list for PBXNativeTarget "SonoEdge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CB16B02B2F9E756C0087EAE9 /* Debug */,
+				CB16B02C2F9E756C0087EAE9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CB16B0172F9E756B0087EAE9 /* Project object */;
+}
