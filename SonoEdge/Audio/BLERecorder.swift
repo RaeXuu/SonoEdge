@@ -56,8 +56,9 @@ final class BLERecorder: NSObject, ObservableObject {
             connectionStatus = "蓝牙未开启"
             return
         }
-        // Scan for ESP32 by its service UUID (efficient + reliable)
-        centralManager.scanForPeripherals(withServices: [serviceUUID], options: nil)
+        // Scan without service UUID filter — some ESP32 BLE stacks don't
+        // include the 128-bit UUID in the advertisement in a way iOS recognizes
+        centralManager.scanForPeripherals(withServices: nil, options: nil)
 
         // Connection timeout
         DispatchQueue.main.asyncAfter(deadline: .now() + connectTimeout) { [weak self] in
@@ -114,7 +115,10 @@ extension BLERecorder: CBCentralManagerDelegate {
                         rssi RSSI: NSNumber) {
         let name = peripheral.name ?? "(unnamed)"
 
-        print("[BLE] 发现 ESP32: name=\(name) id=\(peripheral.identifier.uuidString)")
+        print("[BLE] 发现设备: name=\(name) id=\(peripheral.identifier.uuidString)")
+
+        guard name == "ESP32_Steth" else { return }
+
         centralManager.stopScan()
 
         esp32Peripheral = peripheral

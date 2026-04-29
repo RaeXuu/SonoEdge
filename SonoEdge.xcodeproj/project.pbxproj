@@ -17,6 +17,10 @@
 		CB16B1022F9E79EC0087EAE9 /* heart_model_int8full.tflite in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0F72F9E79EC0087EAE9 /* heart_model_int8full.tflite */; };
 		CB16B1032F9E79EC0087EAE9 /* heart_quality_int8full.tflite in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0F82F9E79EC0087EAE9 /* heart_quality_int8full.tflite */; };
 		CB16B1042F9E79EC0087EAE9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */; };
+		CB2512AC2F9F46650051407A /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2512AB2F9F46650051407A /* MainTabView.swift */; };
+		CB2512AF2F9F7D680051407A /* RecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2512AD2F9F7D680051407A /* RecordStore.swift */; };
+		CB50FC862FA0F56B0069028E /* DebugPreprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB50FC842FA0F56B0069028E /* DebugPreprocess.swift */; };
+		CB50FC8A2FA0F6720069028E /* test_comparison.wav in Resources */ = {isa = PBXBuildFile; fileRef = CB50FC892FA0F6720069028E /* test_comparison.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +36,10 @@
 		CB16B0F72F9E79EC0087EAE9 /* heart_model_int8full.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = heart_model_int8full.tflite; sourceTree = "<group>"; };
 		CB16B0F82F9E79EC0087EAE9 /* heart_quality_int8full.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = heart_quality_int8full.tflite; sourceTree = "<group>"; };
 		CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CB2512AB2F9F46650051407A /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		CB2512AD2F9F7D680051407A /* RecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordStore.swift; sourceTree = "<group>"; };
+		CB50FC842FA0F56B0069028E /* DebugPreprocess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugPreprocess.swift; sourceTree = "<group>"; };
+		CB50FC892FA0F6720069028E /* test_comparison.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = test_comparison.wav; sourceTree = "<group>"; };
 		D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SonoEdge.debug.xcconfig"; path = "Target Support Files/Pods-SonoEdge/Pods-SonoEdge.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,7 +61,6 @@
 				D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */,
 				A1D299AE178C01EF74652B3B /* Pods-SonoEdge.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -86,6 +93,7 @@
 		CB16B0F02F9E79EC0087EAE9 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				CB2512AB2F9F46650051407A /* MainTabView.swift */,
 				CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */,
 				CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */,
 			);
@@ -122,6 +130,9 @@
 		CB16B0FB2F9E79EC0087EAE9 /* SonoEdge */ = {
 			isa = PBXGroup;
 			children = (
+				CB50FC892FA0F6720069028E /* test_comparison.wav */,
+				CB50FC852FA0F56B0069028E /* Debug */,
+				CB2512AE2F9F7D680051407A /* Storage */,
 				CB16B0F02F9E79EC0087EAE9 /* App */,
 				CB16B0F32F9E79EC0087EAE9 /* Audio */,
 				CB16B0F62F9E79EC0087EAE9 /* Inference */,
@@ -129,6 +140,22 @@
 				CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */,
 			);
 			path = SonoEdge;
+			sourceTree = "<group>";
+		};
+		CB2512AE2F9F7D680051407A /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				CB2512AD2F9F7D680051407A /* RecordStore.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		CB50FC852FA0F56B0069028E /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				CB50FC842FA0F56B0069028E /* DebugPreprocess.swift */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -193,6 +220,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB16B1022F9E79EC0087EAE9 /* heart_model_int8full.tflite in Resources */,
+				CB50FC8A2FA0F6720069028E /* test_comparison.wav in Resources */,
 				CB16B1032F9E79EC0087EAE9 /* heart_quality_int8full.tflite in Resources */,
 				CB16B1042F9E79EC0087EAE9 /* Assets.xcassets in Resources */,
 			);
@@ -209,9 +237,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -247,12 +279,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB2512AF2F9F7D680051407A /* RecordStore.swift in Sources */,
 				CB16B0FC2F9E79EC0087EAE9 /* ContentView.swift in Sources */,
 				CB16B0FD2F9E79EC0087EAE9 /* SonoEdgeApp.swift in Sources */,
 				CB16B0FE2F9E79EC0087EAE9 /* AudioProcessor.swift in Sources */,
 				CB16B0FF2F9E79EC0087EAE9 /* BLERecorder.swift in Sources */,
+				CB2512AC2F9F46650051407A /* MainTabView.swift in Sources */,
 				CB16B1002F9E79EC0087EAE9 /* InferencePipeline.swift in Sources */,
 				CB16B1012F9E79EC0087EAE9 /* TFLiteEngine.swift in Sources */,
+				CB50FC862FA0F56B0069028E /* DebugPreprocess.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,10 +426,10 @@
 				DEVELOPMENT_TEAM = U8PM45K54G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
@@ -426,10 +461,10 @@
 				DEVELOPMENT_TEAM = U8PM45K54G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙连接电子听诊器以采集心音数据";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16;

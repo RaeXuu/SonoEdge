@@ -49,7 +49,9 @@ final class TFLiteEngine {
             + "  in=\(isInt8Input ? "int8" : "float32")"
             + "  out=\(isInt8Output ? "int8" : "float32")"
             + "  in_scale=\(String(format: "%.6f", inputScale))"
-            + "  out_scale=\(String(format: "%.6f", outputScale))")
+            + "  in_zp=\(inputZeroPoint)"
+            + "  out_scale=\(String(format: "%.6f", outputScale))"
+            + "  out_zp=\(outputZeroPoint)")
     }
 
     // MARK: - Warmup
@@ -80,13 +82,27 @@ final class TFLiteEngine {
         }
     }
 
+    // MARK: - Debug helpers
+
+#if DEBUG
+    private func softmaxDebug(_ x: [Float]) -> [Float] {
+        let maxX = x.max() ?? 0
+        let expX = x.map { exp($0 - maxX) }
+        let sum = expX.reduce(0, +)
+        return expX.map { $0 / sum }
+    }
+#endif
+
     // MARK: - 推理
 
     /// Float32 输入 → 量化 → 推理 → 反量化 → Float32 输出
     /// 对齐 Pi 端 run_inference() 的 per-window 调用
     func infer(floatInput: [Float]) throws -> [Float] {
+        var quantizedInput: [Int8]? = nil
+
         if isInt8Input {
             let quantized = quantizeInput(floatInput)
+            quantizedInput = quantized
             let data = quantized.withUnsafeBufferPointer { Data(buffer: $0) }
             try interpreter.copy(data, toInputAt: inputIndex)
         } else {
@@ -103,7 +119,25 @@ final class TFLiteEngine {
             let raw = outputTensor.data.withUnsafeBytes {
                 Array($0.bindMemory(to: Int8.self).prefix(count))
             }
-            return dequantizeOutput(raw)
+            let dequant = dequantizeOutput(raw)
+
+#if DEBUG
+            let isDiag = modelName.contains("heart_model")
+            if isDiag, let qi = quantizedInput {
+                let qiMin = qi.map { Int($0) }.min() ?? 0
+                let qiMax = qi.map { Int($0) }.max() ?? 0
+                let clipNeg = qi.filter { $0 == -128 }.count
+                let clipPos = qi.filter { $0 == 127 }.count
+                print("[TFLite:\(modelName)] quant_input: min=\(qiMin) max=\(qiMax) clip_neg=\(clipNeg) clip_pos=\(clipPos) (of \(qi.count))")
+                print("[TFLite:\(modelName)] float_input_range: [\(floatInput.min()!), \(floatInput.max()!)]")
+                print("[TFLite:\(modelName)] raw_int8=\(raw.prefix(4))")
+                print("[TFLite:\(modelName)] dequant_logits=\(dequant.prefix(4).map { String(format: "%.6f", $0) })")
+                let softmaxed = softmaxDebug(dequant)
+                print("[TFLite:\(modelName)] softmax=\(softmaxed.map { String(format: "%.6f", $0) })")
+            }
+#endif
+
+            return dequant
         } else {
             return outputTensor.data.withUnsafeBytes {
                 Array($0.bindMemory(to: Float.self).prefix(count))

@@ -7,7 +7,7 @@ import Accelerate
 //   逐窗口驱动进度回调，实现流式 UI 更新
 //
 // 索引约定:
-//   SQA 模型 : index 0 = Good, index 1 = Bad
+//   SQA 模型 : index 0 = Good, index 1 = Poor
 //   诊断模型: index 0 = Normal, index 1 = Abnormal
 // ================================================================
 
@@ -47,7 +47,7 @@ final class InferencePipeline {
     private let sqaEngine: TFLiteEngine
     private let diagEngine: TFLiteEngine
 
-    private let sqaThreshold: Float  = 0.65
+    private let sqaThreshold: Float  = 0.05
     private let diagThreshold: Float = 0.5
 
     private let chunkSamples: Int  = 2000 * 20   // 40000

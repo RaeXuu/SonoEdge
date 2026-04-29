@@ -45,6 +45,11 @@ final class AppViewModel: ObservableObject {
 
         pipeline = InferencePipeline(sqaEngine: sqa, diagEngine: diag)
 
+#if DEBUG
+        // 比对预处理：把测试 WAV 加入项目，名字改成实际文件名即可
+        DebugPreprocess.run(wavName: "test_comparison.wav", pipeline: pipeline!)
+#endif
+
         bleRecorder = BLERecorder()
         bleRecorder?.onChunkReady = { [weak self] rawChunk in
             Task { [weak self] in
@@ -123,6 +128,12 @@ final class AppViewModel: ObservableObject {
                     self.totalNoise += 1
                     self.statusText = "低质量 (\(result.validWindows)/\(result.totalWindows) 窗口)"
                 }
+
+                RecordStore.appendSummary(label: result.label,
+                                          probNormal: result.avgProbNormal,
+                                          validSegs: result.validWindows,
+                                          totalSegs: result.totalWindows)
+
                 self.isProcessingChunk = false
             }
         } catch {
@@ -296,8 +307,9 @@ struct ContentView: View {
         HStack {
             Text(String(format: "W%02d", w.windowIndex))
                 .font(.system(.caption, design: .monospaced))
-            Text(String(format: "SQA:%.2f", w.sqaScore))
-                .font(.system(.caption, design: .monospaced))
+            Text(w.passedSQA ? "✓" : "✗")
+                .font(.caption)
+                .foregroundColor(w.passedSQA ? .green : .gray)
             if w.passedSQA, let pn = w.probNormal {
                 Text(String(format: "P(N):%.2f", pn))
                     .font(.system(.caption, design: .monospaced))

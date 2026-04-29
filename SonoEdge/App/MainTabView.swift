@@ -15,14 +15,14 @@ struct MainTabView: View {
                 }
                 .tag(0)
 
-            HistoryView()
+            HistoryView(vm: vm)
                 .tabItem {
                     Image(systemName: "clock.arrow.circlepath")
                     Text("记录")
                 }
                 .tag(1)
 
-            ProfileView()
+            ProfileView(vm: vm)
                 .tabItem {
                     Image(systemName: "person.circle")
                     Text("我的")
@@ -240,14 +240,13 @@ struct ExamineView: View {
         HStack {
             Text(String(format: "W%02d", w.windowIndex))
                 .font(.system(.caption, design: .monospaced))
-            Text(String(format: "SQA:%.2f", w.sqaScore))
-                .font(.system(.caption, design: .monospaced))
+            Text(w.passedSQA ? "✓" : "✗")
+                .font(.caption)
+                .foregroundColor(w.passedSQA ? .green : .gray)
             if w.passedSQA, let pn = w.probNormal {
                 Text(String(format: "P(N):%.2f", pn))
                     .font(.system(.caption, design: .monospaced))
                     .foregroundColor(pn > 0.5 ? .green : .red)
-            } else {
-                Text("✗").font(.caption).foregroundColor(.gray)
             }
         }
     }
@@ -276,16 +275,63 @@ struct StatItem: View {
 // MARK: - 记录 Tab（占位）
 
 struct HistoryView: View {
+    @ObservedObject var vm: AppViewModel
+    @State private var records: [[String: Any]] = []
+
     var body: some View {
         NavigationView {
-            VStack {
-                Image(systemName: "tray")
-                    .font(.system(size: 40))
-                    .foregroundColor(.secondary)
-                Text("暂无记录")
-                    .foregroundColor(.secondary)
+            Group {
+                if records.isEmpty {
+                    VStack {
+                        Image(systemName: "tray")
+                            .font(.system(size: 40))
+                            .foregroundColor(.secondary)
+                        Text("暂无记录")
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    List {
+                        ForEach(records.indices.reversed(), id: \.self) { i in
+                            let r = records[i]
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text((r["ts"] as? String) ?? "")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    if let label = r["label"] as? String {
+                                        Text(label)
+                                            .font(.headline)
+                                            .foregroundColor(labelColor(label))
+                                    }
+                                }
+                                Spacer()
+                                if let pn = r["prob_normal"] as? Double {
+                                    Text(String(format: "%.1f%%", pn * 100))
+                                        .font(.subheadline.monospacedDigit())
+                                        .foregroundColor(.secondary)
+                                }
+                                Text("\(r["valid_segs"] as? Int ?? 0)/\(r["total_segs"] as? Int ?? 0)")
+                                    .font(.caption.monospacedDigit())
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                }
             }
             .navigationTitle("记录")
+            .onAppear { records = RecordStore.loadSummaries() }
+            .onChange(of: vm.totalNormal) { _ in records = RecordStore.loadSummaries() }
+            .onChange(of: vm.totalAbnormal) { _ in records = RecordStore.loadSummaries() }
+            .onChange(of: vm.totalNoise) { _ in records = RecordStore.loadSummaries() }
+        }
+    }
+
+    private func labelColor(_ label: String) -> Color {
+        switch label {
+        case "Normal":   return .green
+        case "Abnormal": return .red
+        default:         return .gray
         }
     }
 }
@@ -293,6 +339,8 @@ struct HistoryView: View {
 // MARK: - 我的 Tab（占位）
 
 struct ProfileView: View {
+    @ObservedObject var vm: AppViewModel
+
     var body: some View {
         NavigationView {
             List {
@@ -300,8 +348,8 @@ struct ProfileView: View {
                     HStack {
                         Label("电子听诊器", systemImage: "wave.3.right")
                         Spacer()
-                        Text("未连接")
-                            .foregroundColor(.secondary)
+                        Text(vm.isConnected ? "已连接" : "未连接")
+                            .foregroundColor(vm.isConnected ? .green : .secondary)
                     }
                 }
                 Section("关于") {
@@ -312,3 +360,4 @@ struct ProfileView: View {
         }
     }
 }
+

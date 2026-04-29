@@ -29,50 +29,101 @@ private let kMelPower: Float       = 2.0
 private let kMelEps: Float         = 1e-6
 
 // MARK: - Butterworth 带通滤波器 (order=5, 25-400Hz, zero-phase)
+// 对齐 Pi: scipy.signal.butter(5, [25/1000, 400/1000], btype='band', output='ba') + filtfilt
 
 struct ButterworthBandpass {
 
-    /// Pre-computed SOS coefficients for order-5 Butterworth bandpass [25, 400] Hz @ 2000 Hz
-    /// Generated via: scipy.signal.butter(5, [25/1000, 400/1000], btype='band', output='sos')
-    /// Each row: [b0, b1, b2, a0, a1, a2]  (a0 is always 1.0)
-    private static let sos: [[Double]] = [
-        [0.016987710409093026,  0.03397542081818605,   0.016987710409093026,  1.0, -0.43124111681185834,  0.16460451389960484],
-        [1.0,                   2.0,                   1.0,                   1.0, -0.5007275936949009,   0.5809583354693726],
-        [1.0,                   0.0,                  -1.0,                   1.0, -1.132363909413649,    0.19891236737965803],
-        [1.0,                  -2.0,                   1.0,                   1.0, -1.8714268996406815,   0.8780755546064518],
-        [1.0,                  -2.0,                   1.0,                   1.0, -1.9505964522000812,   0.9567321946304889],
+    /// b, a coefficients for order-5 Butterworth bandpass [25, 400] Hz @ 2000 Hz
+    /// Generated via: scipy.signal.butter(5, [25/1000, 400/1000], output='ba')
+    /// The Pi uses ba-form (transfer function), NOT SOS — so we match that exactly.
+    /// Even though SOS is numerically equivalent, floating-point differences matter for INT8 models.
+    private static let b: [Double] = [
+         0.016987710409093026,  0.0, -0.08493855204546513,  0.0,
+         0.16987710409093026,   0.0, -0.16987710409093026,  0.0,
+         0.08493855204546513,   0.0, -0.016987710409093026
+    ]
+    private static let a: [Double] = [
+         1.0, -5.88635597176117, 15.590871175483045, -24.902215524177628,
+        27.031963965883904, -21.023701701970058, 11.819133833668117,
+        -4.705870557530761, 1.2734414445826752, -0.21324429325710365,
+         0.015979779753429305
     ]
 
-    /// Apply zero-phase Butterworth bandpass (forward-backward filtfilt)
-    /// Equivalent to scipy.signal.sosfiltfilt(sos, x)
+    /// Apply zero-phase Butterworth bandpass using scipy's default method='pad'
+    /// Matches scipy.signal.filtfilt(b, a, x) — odd extension + lfilter_zi + fwd/bwd + crop
     static func apply(to signal: [Float]) -> [Float] {
-        // Convert to Double for numerical stability
-        let input = signal.map { Double($0) }
-        let forward = sosfilt(sos: sos, x: input)
-        let reversed = Array(forward.reversed())
-        let backward = sosfilt(sos: sos, x: reversed)
-        let result = Array(backward.reversed())
-
-        return result.map { Float($0) }
+        let x = signal.map { Double($0) }
+        return filtfiltPad(b: b, a: a, x: x).map { Float($0) }
     }
 
     // MARK: - IIR internals
 
-    /// Apply second-order sections filter (direct form II transposed)
-    /// Equivalent to scipy.signal.sosfilt(sos, x)
-    private static func sosfilt(sos: [[Double]], x: [Double]) -> [Double] {
-        var y = x
-        for section in sos {
-            let b0 = section[0], b1 = section[1], b2 = section[2]
-            let a1 = section[4], a2 = section[5]
+    /// Matches scipy.signal.filtfilt(b, a, x) with method='pad' (scipy default).
+    /// Odd extension (padlen = 3 * max(len(a), len(b))) → forward lfilter with
+    /// zi*ext[0] → reverse lfilter with zi*yFwd[-1] → crop padding.
+    private static func filtfiltPad(b: [Double], a: [Double], x: [Double]) -> [Double] {
+        let nTaps = max(a.count, b.count)
+        let padlen = 3 * nTaps  // = 33 for our filter
 
-            var w1: Double = 0, w2: Double = 0
-            for i in 0..<y.count {
-                let w0 = y[i] - a1 * w1 - a2 * w2
-                y[i] = b0 * w0 + b1 * w1 + b2 * w2
-                w2 = w1
-                w1 = w0
+        guard x.count > padlen else { return [] }
+
+        // Odd extension (matches scipy.signal._arraytools._pad_odd)
+        let n = x.count
+        var front = [Double](repeating: 0, count: padlen)
+        for i in 0..<padlen {
+            front[i] = 2 * x[0] - x[padlen - i]
+        }
+        var back = [Double](repeating: 0, count: padlen)
+        for i in 0..<padlen {
+            back[i] = 2 * x[n - 1] - x[n - 2 - i]
+        }
+        let ext = front + x + back
+
+        // Forward / backward passes with lfilter_zi initial conditions
+        let zi = lfilterZi(b: b, a: a)
+        let yFwd = lfilterDf2t(b: b, a: a, x: ext, zi: zi.map { $0 * ext[0] })
+        let yBwd = lfilterDf2t(b: b, a: a,
+                               x: Array(yFwd.reversed()),
+                               zi: zi.map { $0 * yFwd[yFwd.count - 1] })
+        let y = Array(yBwd.reversed())
+
+        // Crop padding
+        return Array(y[padlen ..< (y.count - padlen)])
+    }
+
+    /// scipy.signal.lfilter_zi(b, a) — steady-state delay-line for df2t form.
+    /// Solves (I − A)·zi = B via back-substitution, where
+    ///   B[k]  = b[k+1] − a[k+1]·b[0]
+    ///   zi[k] = Σ_{j=k}^{N-1} B[j]  −  zi[0] · Σ_{j=k+1}^{N} a[j]
+    ///   zi[0] = Σ B / Σ a
+    private static func lfilterZi(b: [Double], a: [Double]) -> [Double] {
+        let N = a.count - 1
+        var B = [Double](repeating: 0, count: N)
+        for k in 0..<N {
+            B[k] = (k + 1 < b.count ? b[k + 1] : 0.0) - a[k + 1] * b[0]
+        }
+        let zi0 = B.reduce(0, +) / a.reduce(0, +)
+        var zi = [Double](repeating: 0, count: N)
+        for k in 0..<N {
+            var cumB = 0.0; for j in k..<N      { cumB += B[j] }
+            var cumA = 0.0; for j in (k+1)...N  { cumA += a[j] }
+            zi[k] = cumB - zi0 * cumA
+        }
+        return zi
+    }
+
+    /// scipy.signal.lfilter(b, a, x, zi=zi) — direct form II transposed.
+    private static func lfilterDf2t(b: [Double], a: [Double], x: [Double], zi: [Double]) -> [Double] {
+        let N = a.count - 1
+        let len = x.count
+        var y = [Double](repeating: 0, count: len)
+        var z = zi
+        for n in 0..<len {
+            y[n] = b[0] * x[n] + z[0]
+            for k in 0 ..< N - 1 {
+                z[k] = (k + 1 < b.count ? b[k + 1] : 0.0) * x[n] - a[k + 1] * y[n] + z[k + 1]
             }
+            z[N - 1] = (N < b.count ? b[N] : 0.0) * x[n] - a[N] * y[n]
         }
         return y
     }
@@ -146,12 +197,24 @@ struct MelSpectrogram {
 
         let nFrames = 1 + (padded.count - nFFT) / hopLen
 
-        // Hann window
+        // Hann window — unnormalized, matching scipy.signal.hann / librosa default
+        // (vDSP_HANN_NORM normalizes coherent gain to 1.0, which scales values ~2×;
+        //  that causes INT8 input saturation for the diagnosis model)
         var window = [Float](repeating: 0, count: winLen)
-        vDSP_hann_window(&window, vDSP_Length(winLen), Int32(vDSP_HANN_NORM))
+        vDSP_hann_window(&window, vDSP_Length(winLen), Int32(vDSP_HANN_DENORM))
+        do {  // Debug: print Hann window values once
+            struct Once { static var done = false }
+            if !Once.done { Once.done = true
+                print("[Debug] Hann[0..4]=\(window.prefix(5).map{String(format:"%.6f",$0)}) "
+                    + "[126..129]=\(window[126..<130].map{String(format:"%.6f",$0)}) "
+                    + "max=\(window.max()!)")
+            }
+        }
 
-        // FFT setup (create once, reuse for all frames)
-        let log2n = vDSP_Length(log2(Float(nFFT)))
+        // FFT setup for N=256 real FFT: vDSP expects log2n=log2(256)=8 (real count).
+        // Input must be even/odd interleaved into N/2=128 complex values.
+        // vDSP internally unpacks the complex FFT output back to N/2+1 real bins.
+        let log2n = vDSP_Length(log2(Float(nFFT)))  // log2(256) = 8
         let fftSetup = vDSP.FFT(log2n: log2n, radix: .radix2,
                                  ofType: DSPSplitComplex.self)!
 
@@ -159,34 +222,46 @@ struct MelSpectrogram {
 
         for i in 0..<nFrames {
             let start = i * hopLen
-            var frame = [Float](repeating: 0, count: nFFT)
-            for j in 0..<winLen {
-                frame[j] = padded[start + j] * window[j]
-            }
+            let half = nFFT / 2  // 128
 
-            var realPart = [Float](repeating: 0, count: nFFT / 2)
-            var imagPart = [Float](repeating: 0, count: nFFT / 2)
+            // vDSP real FFT split-complex input packing (even/odd interleave):
+            //   realPart[j] = x[2*j], imagPart[j] = x[2*j+1]
+            var realPart = [Float](repeating: 0, count: half)
+            var imagPart = [Float](repeating: 0, count: half)
+            for j in 0..<half {
+                realPart[j] = padded[start + 2 * j]       * window[2 * j]
+                imagPart[j] = padded[start + 2 * j + 1]   * window[2 * j + 1]
+            }
 
             realPart.withUnsafeMutableBufferPointer { rp in
                 imagPart.withUnsafeMutableBufferPointer { ip in
                     var split = DSPSplitComplex(realp: rp.baseAddress!,
                                                 imagp: ip.baseAddress!)
-                    frame.withUnsafeBytes { ptr in
-                        let typed = ptr.bindMemory(to: DSPComplex.self)
-                        vDSP_ctoz(typed.baseAddress!, 2, &split, 1,
-                                  vDSP_Length(nFFT / 2))
-                    }
                     fftSetup.forward(input: split, output: &split)
                 }
             }
 
             // Magnitude, then power (|S|^2)
+            // vDSP real FFT packs N/2 complex numbers:
+            //   DC in realPart[0], Nyquist in imagPart[0]
+            //   other bins in (realPart[k], imagPart[k]) for k=1..<N/2
+            // vDSP outputs 2x standard DFT magnitude — divide by 2 to match numpy/librosa
             var row = [Float](repeating: 0, count: nFFT / 2 + 1)
-            for k in 0..<(nFFT / 2 + 1) {
-                let mag = sqrt(realPart[k] * realPart[k] + imagPart[k] * imagPart[k])
+            row[0] = pow(abs(realPart[0] / 2.0), kMelPower)
+            for k in 1..<(nFFT / 2) {
+                let mag = sqrt(realPart[k] * realPart[k] + imagPart[k] * imagPart[k]) / 2.0
                 row[k] = pow(mag, kMelPower)
             }
+            row[nFFT / 2] = pow(abs(imagPart[0] / 2.0), kMelPower)
             result.append(row)
+        }
+
+        do {  // Debug: print first frame STFT once, cross-validate with DebugPreprocess
+            struct Once { static var done = false }
+            if !Once.done { Once.done = true
+                let f0 = result[0]
+                print("[Debug] stftLibrosaStyle[0]: first10=\(f0[0..<10].map { String(format: "%.2f", $0) })")
+            }
         }
 
         return result  // (nFrames, freqBins)
@@ -204,27 +279,34 @@ struct MelSpectrogram {
         let melPoints = (0..<(kMelBands + 2)).map { i -> Float in
             melToHz(melMin + (melMax - melMin) * Float(i) / Float(kMelBands + 1))
         }
-        let bins = melPoints.map { f -> Int in
-            Int(floor(Float(nFreqs) * f / (kSampleRate / 2)))
-        }
+
+        // FFT bin center frequencies: f_k = k * sr / n_fft
+        let binHz: [Float] = (0..<nFreqs).map { Float($0) * kSampleRate / Float(kMelFFT) }
 
         for m in 0..<kMelBands {
-            let start = bins[m]
-            let center = bins[m + 1]
-            let end   = min(bins[m + 2], nFreqs - 1)
+            let fLow    = melPoints[m]
+            let fCenter = melPoints[m + 1]
+            let fHigh   = melPoints[m + 2]
 
-            for k in start..<center where center > start {
-                fb[m][k] = Float(k - start) / Float(center - start)
-            }
-            for k in center...end where end > center {
-                fb[m][k] = Float(end - k) / Float(end - center)
+            // Frequency-based triangle weights (matching librosa's np.searchsorted + linear interp)
+            for k in 0..<nFreqs {
+                let fk = binHz[k]
+                if fk <= fLow || fk >= fHigh { continue }
+
+                let denomRise = fCenter - fLow
+                let denomFall = fHigh - fCenter
+
+                if fk <= fCenter && denomRise > 0 {
+                    fb[m][k] = (fk - fLow) / denomRise
+                } else if fk > fCenter && denomFall > 0 {
+                    fb[m][k] = (fHigh - fk) / denomFall
+                }
             }
 
-            // Slaney normalization (norm='slaney'): divide by bandwidth in Hz
-            // Matches librosa 0.11.0 default: enorm = 2.0 / (mel_f[m+2] - mel_f[m])
-            let bandwidth = melPoints[m + 2] - melPoints[m]
+            // Slaney normalization (norm='slaney'): enorm = 2.0 / (mel_f[m+2] - mel_f[m])
+            let bandwidth = fHigh - fLow
             if bandwidth > 0 {
-                let enorm = 2.0 / bandwidth
+                let enorm: Float = 2.0 / bandwidth
                 for k in 0..<nFreqs {
                     fb[m][k] *= enorm
                 }
@@ -267,12 +349,23 @@ struct MelSpectrogram {
         }
     }
 
-    // ── Mel scale utils ──
+    // ── Mel scale utils (Slaney / librosa htk=False default) ──
+    // Below 1000 Hz: linear region. Above: logarithmic.
 
     private static func hzToMel(_ hz: Float) -> Float {
-        2595.0 * log10(1.0 + hz / 700.0)
+        if hz < 1000.0 {
+            return hz * 3.0 / 200.0
+        } else {
+            let logstep: Float = logf(6.4) / 27.0
+            return 15.0 + logf(hz / 1000.0) / logstep
+        }
     }
     private static func melToHz(_ mel: Float) -> Float {
-        700.0 * (pow(10.0, mel / 2595.0) - 1.0)
+        if mel < 15.0 {
+            return mel * 200.0 / 3.0
+        } else {
+            let logstep: Float = logf(6.4) / 27.0
+            return 1000.0 * expf(logstep * (mel - 15.0))
+        }
     }
 }
