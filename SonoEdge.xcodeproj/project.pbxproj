@@ -7,8 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		144288684DDE840308E532BD /* AlertsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE844EF267247B1FE23DDFD /* AlertsList.swift */; };
+		2655338423AE382C83D88E94 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C00C7AA5C3578A5C44691E /* SettingsView.swift */; };
+		4CC3E1C06395290F465F8374 /* MonitoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1E5C83E7F7013F80404E735 /* MonitoringService.swift */; };
+		6562AB319AFF647C832A0AFD /* TrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BD91097AB796FFDE7BA486 /* TrendChart.swift */; };
 		6E277F47761C5DEC9D7CE887 /* Pods_SonoEdge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 309EAA0C40014F8BC44E6F35 /* Pods_SonoEdge.framework */; };
-		CB16B0FC2F9E79EC0087EAE9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */; };
+		8B9B9EBDD648B39186CB9275 /* BackgroundTaskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCE1A7D6CE3CA380776236B /* BackgroundTaskService.swift */; };
+		C8AAB650D0023C692C418D4D /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB404CCDEF86F969CE435F1 /* NotificationService.swift */; };
 		CB16B0FD2F9E79EC0087EAE9 /* SonoEdgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */; };
 		CB16B0FE2F9E79EC0087EAE9 /* AudioProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F12F9E79EC0087EAE9 /* AudioProcessor.swift */; };
 		CB16B0FF2F9E79EC0087EAE9 /* BLERecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB16B0F22F9E79EC0087EAE9 /* BLERecorder.swift */; };
@@ -21,13 +26,22 @@
 		CB2512AF2F9F7D680051407A /* RecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2512AD2F9F7D680051407A /* RecordStore.swift */; };
 		CB50FC862FA0F56B0069028E /* DebugPreprocess.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB50FC842FA0F56B0069028E /* DebugPreprocess.swift */; };
 		CB50FC8A2FA0F6720069028E /* test_comparison.wav in Resources */ = {isa = PBXBuildFile; fileRef = CB50FC892FA0F6720069028E /* test_comparison.wav */; };
+		CE6CE63DCCBA19C88498B3F0 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7DC998D37D8D2EB66B0935 /* HistoryView.swift */; };
+		F27F6AEB3B8D78A1C7EFC1EC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444C39F6F0AD3A3B55A8EE4F /* DashboardView.swift */; };
+		F8F855F96AF8D5B4B76FFC6A /* StatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C585686BC68E55C8F064E8 /* StatusCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		309EAA0C40014F8BC44E6F35 /* Pods_SonoEdge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SonoEdge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		444C39F6F0AD3A3B55A8EE4F /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		4B7DC998D37D8D2EB66B0935 /* HistoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		51BD91097AB796FFDE7BA486 /* TrendChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrendChart.swift; sourceTree = "<group>"; };
+		5AE844EF267247B1FE23DDFD /* AlertsList.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlertsList.swift; sourceTree = "<group>"; };
+		6CB404CCDEF86F969CE435F1 /* NotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		84C585686BC68E55C8F064E8 /* StatusCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatusCard.swift; sourceTree = "<group>"; };
 		A1D299AE178C01EF74652B3B /* Pods-SonoEdge.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SonoEdge.release.xcconfig"; path = "Target Support Files/Pods-SonoEdge/Pods-SonoEdge.release.xcconfig"; sourceTree = "<group>"; };
+		ABCE1A7D6CE3CA380776236B /* BackgroundTaskService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackgroundTaskService.swift; sourceTree = "<group>"; };
 		CB16B01F2F9E756B0087EAE9 /* SonoEdge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SonoEdge.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonoEdgeApp.swift; sourceTree = "<group>"; };
 		CB16B0F12F9E79EC0087EAE9 /* AudioProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProcessor.swift; sourceTree = "<group>"; };
 		CB16B0F22F9E79EC0087EAE9 /* BLERecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLERecorder.swift; sourceTree = "<group>"; };
@@ -40,7 +54,9 @@
 		CB2512AD2F9F7D680051407A /* RecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordStore.swift; sourceTree = "<group>"; };
 		CB50FC842FA0F56B0069028E /* DebugPreprocess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugPreprocess.swift; sourceTree = "<group>"; };
 		CB50FC892FA0F6720069028E /* test_comparison.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = test_comparison.wav; sourceTree = "<group>"; };
+		D1C00C7AA5C3578A5C44691E /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D794B192446C54639EC65E66 /* Pods-SonoEdge.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SonoEdge.debug.xcconfig"; path = "Target Support Files/Pods-SonoEdge/Pods-SonoEdge.debug.xcconfig"; sourceTree = "<group>"; };
+		F1E5C83E7F7013F80404E735 /* MonitoringService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MonitoringService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +88,58 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		46CD54CA98B15C8D5BFF6885 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F1E5C83E7F7013F80404E735 /* MonitoringService.swift */,
+				6CB404CCDEF86F969CE435F1 /* NotificationService.swift */,
+				ABCE1A7D6CE3CA380776236B /* BackgroundTaskService.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		4E5C693BDCC221A18A680229 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				D1C00C7AA5C3578A5C44691E /* SettingsView.swift */,
+			);
+			name = Settings;
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		8027EEB88FF3D21B7C16142E /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				444C39F6F0AD3A3B55A8EE4F /* DashboardView.swift */,
+				84C585686BC68E55C8F064E8 /* StatusCard.swift */,
+				51BD91097AB796FFDE7BA486 /* TrendChart.swift */,
+				5AE844EF267247B1FE23DDFD /* AlertsList.swift */,
+			);
+			name = Dashboard;
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		8470D06C552F025EE92E147F /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				8027EEB88FF3D21B7C16142E /* Dashboard */,
+				85664024F9CFAE0650A62369 /* History */,
+				4E5C693BDCC221A18A680229 /* Settings */,
+			);
+			name = UI;
+			path = UI;
+			sourceTree = "<group>";
+		};
+		85664024F9CFAE0650A62369 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				4B7DC998D37D8D2EB66B0935 /* HistoryView.swift */,
+			);
+			name = History;
+			path = History;
+			sourceTree = "<group>";
+		};
 		CB16B0162F9E756B0087EAE9 = {
 			isa = PBXGroup;
 			children = (
@@ -94,7 +162,6 @@
 			isa = PBXGroup;
 			children = (
 				CB2512AB2F9F46650051407A /* MainTabView.swift */,
-				CB16B0EE2F9E79EC0087EAE9 /* ContentView.swift */,
 				CB16B0EF2F9E79EC0087EAE9 /* SonoEdgeApp.swift */,
 			);
 			path = App;
@@ -138,6 +205,8 @@
 				CB16B0F62F9E79EC0087EAE9 /* Inference */,
 				CB16B0F92F9E79EC0087EAE9 /* Models */,
 				CB16B0FA2F9E79EC0087EAE9 /* Assets.xcassets */,
+				46CD54CA98B15C8D5BFF6885 /* Services */,
+				8470D06C552F025EE92E147F /* UI */,
 			);
 			path = SonoEdge;
 			sourceTree = "<group>";
@@ -237,13 +306,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SonoEdge/Pods-SonoEdge-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -280,7 +345,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB2512AF2F9F7D680051407A /* RecordStore.swift in Sources */,
-				CB16B0FC2F9E79EC0087EAE9 /* ContentView.swift in Sources */,
 				CB16B0FD2F9E79EC0087EAE9 /* SonoEdgeApp.swift in Sources */,
 				CB16B0FE2F9E79EC0087EAE9 /* AudioProcessor.swift in Sources */,
 				CB16B0FF2F9E79EC0087EAE9 /* BLERecorder.swift in Sources */,
@@ -288,6 +352,15 @@
 				CB16B1002F9E79EC0087EAE9 /* InferencePipeline.swift in Sources */,
 				CB16B1012F9E79EC0087EAE9 /* TFLiteEngine.swift in Sources */,
 				CB50FC862FA0F56B0069028E /* DebugPreprocess.swift in Sources */,
+				4CC3E1C06395290F465F8374 /* MonitoringService.swift in Sources */,
+				C8AAB650D0023C692C418D4D /* NotificationService.swift in Sources */,
+				8B9B9EBDD648B39186CB9275 /* BackgroundTaskService.swift in Sources */,
+				F27F6AEB3B8D78A1C7EFC1EC /* DashboardView.swift in Sources */,
+				F8F855F96AF8D5B4B76FFC6A /* StatusCard.swift in Sources */,
+				6562AB319AFF647C832A0AFD /* TrendChart.swift in Sources */,
+				144288684DDE840308E532BD /* AlertsList.swift in Sources */,
+				CE6CE63DCCBA19C88498B3F0 /* HistoryView.swift in Sources */,
+				2655338423AE382C83D88E94 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
