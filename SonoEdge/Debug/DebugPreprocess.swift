@@ -2,26 +2,26 @@ import Foundation
 import Accelerate
 
 
-/// 对齐 Pi 端 main_pi_debug.py：加载 WAV → 预处理 → 推理 → 打印中间值
-/// 用于对比 Pi 和 iOS 的预处理差异
+/// Aligns with Pi main_pi_debug.py: load WAV → preprocess → inference → print intermediate values
+/// Used to compare preprocessing differences between Pi and iOS
 struct DebugPreprocess {
 
-    /// 处理 app bundle 中的 WAV 文件，打印 Mel 值、SQA 分数、诊断结果
+    /// Process WAV file from app bundle, print Mel values, SQA scores, and diagnosis results
     static func run(wavName: String, pipeline: InferencePipeline) {
         guard let url = Bundle.main.url(forResource: wavName, withExtension: nil) else {
-            print("[Debug] 找不到文件: \(wavName)")
+            print("[Debug] File not found: \(wavName)")
             return
         }
 
         guard let wav = readWAV(url: url) else {
-            print("[Debug] WAV 解析失败: \(wavName)")
+            print("[Debug] WAV parse failed: \(wavName)")
             return
         }
 
         let sr = wav.sampleRate
         var audio = wav.samples
 
-        // 如果采样率不是 2000，简单降采样（取平均）
+        // If sample rate is not 2000, simple downsampling (averaging)
         if sr != 2000 {
             let ratio = sr / 2000
             var downsampled = [Float]()
@@ -30,10 +30,10 @@ struct DebugPreprocess {
                 downsampled.append(chunk.reduce(0, +) / Float(ratio))
             }
             audio = downsampled
-            print("[Debug] 降采样: \(sr) → 2000Hz, 样本数: \(audio.count)")
+            print("[Debug] Downsampled: \(sr) → 2000Hz, sample count: \(audio.count)")
         }
 
-        // 全局峰值归一化，对齐 Pi 端 load_wav 的行为
+        // Global peak normalization, aligned with Pi load_wav behavior
         let globalMax = audio.map(abs).max() ?? 1.0
         if globalMax > 0 { audio = audio.map { $0 / globalMax } }
 
@@ -43,20 +43,20 @@ struct DebugPreprocess {
         }
         let chunk = Array(audio.prefix(chunkSamples))
 
-        print("[Debug] === 预处理对比 ===")
-        print("[Debug] 原始: first10=\(chunk[0..<10].map { String(format: "%.6f", $0) })")
+        print("[Debug] === Preprocessing comparison ===")
+        print("[Debug] Original: first10=\(chunk[0..<10].map { String(format: "%.6f", $0) })")
 
         let filtered = ButterworthBandpass.apply(to: chunk)
         print("[Debug] filtfilt chunk.count=\(chunk.count) filtered.count=\(filtered.count)")
-        print("[Debug] 滤波后: first10=\(filtered[0..<10].map { String(format: "%.6f", $0) })")
-        print("[Debug] 滤波后[100..<110]=\(filtered[100..<110].map { String(format: "%.6f", $0) })")
+        print("[Debug] Filtered: first10=\(filtered[0..<10].map { String(format: "%.6f", $0) })")
+        print("[Debug] Filtered[100..<110]=\(filtered[100..<110].map { String(format: "%.6f", $0) })")
 
         let window = Array(filtered[0..<4000])
         let mx = window.map(abs).max() ?? 1.0
         let normalized = mx > 0 ? window.map { $0 / mx } : window
-        print("[Debug] 归一化后: first10=\(normalized[0..<10].map { String(format: "%.6f", $0) }) max=\(mx)")
+        print("[Debug] Normalized: first10=\(normalized[0..<10].map { String(format: "%.6f", $0) }) max=\(mx)")
 
-        // STFT 第一帧
+        // STFT first frame
         let stftFirst = DebugPreprocess.stftFirstFrame(signal: normalized)
         print("[Debug] STFT[0]: first10=\(stftFirst[0..<10].map { String(format: "%.2f", $0) })")
 
@@ -65,8 +65,8 @@ struct DebugPreprocess {
         print("[Debug] Mel[64..<74] = \(mel[64..<74].map { String(format: "%.6f", $0) })")
         print("[Debug] Mel min=\(mel.min()!) max=\(mel.max()!) mean=\(mel.reduce(0,+)/Float(mel.count))")
 
-        // 跑一遍推理
-        print("[Debug] === 推理结果 ===")
+        // Run inference
+        print("[Debug] === Inference Results ===")
         let int16Samples = chunk.map { Int16(max(-32768, min(32767, ($0 * 32767).rounded()))) }
         let rawBytes = int16Samples.withUnsafeBytes { Data($0) }
 
@@ -79,7 +79,7 @@ struct DebugPreprocess {
                     print("[Debug]   W\(String(format: "%02d", w.windowIndex)) SQA=\(String(format: "%.4f", w.sqaScore)) passed=\(w.passedSQA) P(N)=\(pn)")
                 }
             } catch {
-                print("[Debug] 推理失败: \(error)")
+                print("[Debug] Inference failed: \(error)")
             }
         }
     }
@@ -132,16 +132,16 @@ struct DebugPreprocess {
         guard data.count > 44,
               String(data: data.subdata(in: 0..<4), encoding: .ascii) == "RIFF",
               String(data: data.subdata(in: 8..<12), encoding: .ascii) == "WAVE" else {
-            print("[Debug] 不是有效的 WAV 文件")
+            print("[Debug] Not a valid WAV file")
             return nil
         }
 
-        // 解析 fmt chunk
+        // Parse fmt chunk
         let sampleRate = Int(data[24..<28].withUnsafeBytes { $0.load(as: UInt32.self) })
         let bitsPerSample = Int(data[34..<36].withUnsafeBytes { $0.load(as: UInt16.self) })
         let numChannels = Int(data[22..<24].withUnsafeBytes { $0.load(as: UInt16.self) })
 
-        // 找 "data" chunk
+        // Find "data" chunk
         var offset = 36
         while offset + 8 <= data.count {
             let chunkID = String(data: data.subdata(in: offset..<offset+4), encoding: .ascii)
@@ -163,7 +163,7 @@ struct DebugPreprocess {
                     }
                 }
 
-                // 如果多声道，只取左声道
+                // If multi-channel, take left channel only
                 if numChannels > 1 {
                     var mono = [Float]()
                     for i in stride(from: 0, to: samples.count, by: numChannels) {

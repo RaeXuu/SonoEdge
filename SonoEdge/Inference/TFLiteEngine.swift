@@ -1,8 +1,9 @@
 import Foundation
+import Darwin
 import TensorFlowLite
 
-/// 对齐 Pi 端 main_pi.py 的 TFLite 推理引擎
-/// 支持 INT8 全整型量化模型（输入/输出均为 INT8，需手动量化和反量化）
+/// Aligns with Pi main_pi.py TFLite inference engine
+/// Supports INT8 full-integer quantized models (input/output are INT8, manual quantize/dequantize required)
 final class TFLiteEngine {
     private let interpreter: Interpreter
     private let inputIndex: Int
@@ -14,20 +15,27 @@ final class TFLiteEngine {
     let outputZeroPoint: Int
     let isInt8Input: Bool
     let isInt8Output: Bool
+    let modelPath: String
     let modelName: String
 
-    /// 输入形状 [1, 1, 64, 64]
+    /// Input shape [1, 1, 64, 64]
     var inputShape: [Int] { [1, 1, 64, 64] }
 
     // MARK: - Init
 
-    init(modelPath: String) throws {
+    init(modelPath: String, threadCount: Int? = nil) throws {
+        self.modelPath = modelPath
         modelName = URL(fileURLWithPath: modelPath).lastPathComponent
 
+        let t0 = CFAbsoluteTimeGetCurrent()
+
         var options = Interpreter.Options()
-        options.threadCount = max(1, ProcessInfo.processInfo.activeProcessorCount - 1)
+        options.threadCount = threadCount ?? max(1, ProcessInfo.processInfo.activeProcessorCount - 1)
         interpreter = try Interpreter(modelPath: modelPath, options: options)
         try interpreter.allocateTensors()
+
+        let loadMs = (CFAbsoluteTimeGetCurrent() - t0) * 1000.0
+        print("[TFLite] \(modelName) load_time=\(String(format: "%.2f", loadMs))ms")
 
         inputIndex  = 0
         outputIndex = 0
@@ -67,7 +75,74 @@ final class TFLiteEngine {
         }
     }
 
-    // MARK: - 量化 / 反量化
+    // MARK: - Benchmark
+
+    /// Full single-inference flow aligned with Pi bench_model():
+    ///   copy input → invoke → read output tensor → dequantize (if INT8)
+    /// Input data pre-quantized once outside loop, re-copied each iteration (matches Pi set_tensor behavior).
+    func benchmark(iterations: Int = 100) throws {
+        try warmup(count: 10)
+
+        let elementCount = inputShape.reduce(1, *)
+        let randomInt8 = (0..<elementCount).map { _ in Int8(Int.random(in: -128...127)) }
+        let inputData = randomInt8.withUnsafeBufferPointer { Data(buffer: $0) }
+
+        let rssBefore = Self.getResidentMemory()
+        let cpuBefore = Self.getTaskThreadTimes()
+
+        var samples: [Double] = []
+        samples.reserveCapacity(iterations)
+        for _ in 0..<iterations {
+            let t0 = CFAbsoluteTimeGetCurrent()
+
+            // 1. Write input (aligns with Pi: set_tensor)
+            try interpreter.copy(inputData, toInputAt: inputIndex)
+            // 2. Inference
+            try interpreter.invoke()
+            // 3. Read output (aligns with Pi: get_tensor)
+            let outputTensor = try interpreter.output(at: outputIndex)
+            // 4. Dequantize (aligns with Pi: if is_int8_out: _ = (raw - zp) * scale)
+            if isInt8Output {
+                let count = outputTensor.shape.dimensions.reduce(1, *)
+                _ = outputTensor.data.withUnsafeBytes { ptr -> [Float] in
+                    ptr.bindMemory(to: Int8.self).prefix(count).map { i8 in
+                        (Float(i8) - Float(outputZeroPoint)) * outputScale
+                    }
+                }
+            }
+
+            samples.append((CFAbsoluteTimeGetCurrent() - t0) * 1000.0)
+        }
+
+        let cpuAfter = Self.getTaskThreadTimes()
+        let rssAfter = Self.getResidentMemory()
+
+        samples.sort()
+        let median = samples[iterations / 2]
+        let p95 = samples[Int(Double(iterations) * 0.95)]
+        let minV = samples.first ?? 0
+        let maxV = samples.last ?? 0
+        let mean = samples.reduce(0, +) / Double(iterations)
+
+        let wallMs = Double(iterations) * median
+        let cpuUserDeltaUs = cpuAfter.user - cpuBefore.user
+        let cpuSysDeltaUs  = cpuAfter.system - cpuBefore.system
+        let cpuPct = wallMs > 0 ? (Double(cpuUserDeltaUs + cpuSysDeltaUs) / 1000.0 / wallMs * 100.0) : 0
+        let rssDelta = Int64(rssAfter) - Int64(rssBefore)
+
+        print("[TFLite:bench] \(modelName)  iters=\(iterations)"
+            + "  median=\(String(format: "%.3f", median))ms"
+            + "  p95=\(String(format: "%.3f", p95))ms"
+            + "  mean=\(String(format: "%.3f", mean))ms"
+            + "  min=\(String(format: "%.3f", minV))ms"
+            + "  max=\(String(format: "%.3f", maxV))ms"
+            + "  threads=\(ProcessInfo.processInfo.activeProcessorCount - 1)")
+        print("[TFLite:bench] \(modelName)  rss_before=\(rssBefore)B  rss_after=\(rssAfter)B"
+            + "  rss_delta=\(rssDelta > 0 ? "+" : "")\(rssDelta)B"
+            + "  cpu_user=\(cpuUserDeltaUs)us  cpu_sys=\(cpuSysDeltaUs)us  cpu_pct=\(String(format: "%.1f", cpuPct))%")
+    }
+
+    // MARK: - Quantize / Dequantize
 
     private func quantizeInput(_ floatData: [Float]) -> [Int8] {
         return floatData.map { f in
@@ -93,10 +168,10 @@ final class TFLiteEngine {
     }
 #endif
 
-    // MARK: - 推理
+    // MARK: - Inference
 
-    /// Float32 输入 → 量化 → 推理 → 反量化 → Float32 输出
-    /// 对齐 Pi 端 run_inference() 的 per-window 调用
+    /// Float32 input → quantize → inference → dequantize → Float32 output
+    /// Aligns with Pi run_inference() per-window call
     func infer(floatInput: [Float]) throws -> [Float] {
         var quantizedInput: [Int8]? = nil
 
@@ -143,5 +218,93 @@ final class TFLiteEngine {
                 Array($0.bindMemory(to: Float.self).prefix(count))
             }
         }
+    }
+
+    // MARK: - Single-thread sanity check
+
+    /// Single-threaded version, flow fully aligned with benchmark() (copy → invoke → read → dequant).
+    func benchmarkSingleThread(iterations: Int = 100) throws {
+        print("[TFLite:bench-1t] \(modelName)  creating single-thread interpreter...")
+        var options = Interpreter.Options()
+        options.threadCount = 1
+        let stInterpreter = try Interpreter(modelPath: modelPath, options: options)
+        try stInterpreter.allocateTensors()
+
+        let elementCount = inputShape.reduce(1, *)
+        let randomInt8 = (0..<elementCount).map { _ in Int8(Int.random(in: -128...127)) }
+        let inputData = randomInt8.withUnsafeBufferPointer { Data(buffer: $0) }
+
+        // Warmup
+        for _ in 0..<10 {
+            try stInterpreter.copy(inputData, toInputAt: 0)
+            try stInterpreter.invoke()
+            _ = try stInterpreter.output(at: 0)
+        }
+
+        // Benchmark loop (aligns with Pi bench_model)
+        var samples: [Double] = []
+        samples.reserveCapacity(iterations)
+        for _ in 0..<iterations {
+            let t0 = CFAbsoluteTimeGetCurrent()
+
+            try stInterpreter.copy(inputData, toInputAt: 0)
+            try stInterpreter.invoke()
+            let outputTensor = try stInterpreter.output(at: 0)
+            if isInt8Output {
+                let count = outputTensor.shape.dimensions.reduce(1, *)
+                _ = outputTensor.data.withUnsafeBytes { ptr -> [Float] in
+                    ptr.bindMemory(to: Int8.self).prefix(count).map { i8 in
+                        (Float(i8) - Float(outputZeroPoint)) * outputScale
+                    }
+                }
+            }
+
+            samples.append((CFAbsoluteTimeGetCurrent() - t0) * 1000.0)
+        }
+
+        samples.sort()
+        let median = samples[iterations / 2]
+        let p95 = samples[Int(Double(iterations) * 0.95)]
+        let minV = samples.first ?? 0
+        let maxV = samples.last ?? 0
+        let mean = samples.reduce(0, +) / Double(iterations)
+
+        print("[TFLite:bench-1t] \(modelName)  iters=\(iterations)"
+            + "  median=\(String(format: "%.3f", median))ms"
+            + "  p95=\(String(format: "%.3f", p95))ms"
+            + "  mean=\(String(format: "%.3f", mean))ms"
+            + "  min=\(String(format: "%.3f", minV))ms"
+            + "  max=\(String(format: "%.3f", maxV))ms"
+            + "  threads=1")
+    }
+
+    // MARK: - System metrics helpers
+
+    /// Current process resident memory (bytes)
+    static func getResidentMemory() -> UInt64 {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size / MemoryLayout<natural_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return 0 }
+        return info.resident_size
+    }
+
+    /// Current process accumulated CPU time (microseconds), returns (user, system)
+    static func getTaskThreadTimes() -> (user: UInt64, system: UInt64) {
+        var info = task_thread_times_info()
+        var count = mach_msg_type_number_t(MemoryLayout<task_thread_times_info>.size / MemoryLayout<natural_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(TASK_THREAD_TIMES_INFO), $0, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return (0, 0) }
+        let userUs = UInt64(info.user_time.seconds) * 1_000_000 + UInt64(info.user_time.microseconds)
+        let sysUs  = UInt64(info.system_time.seconds) * 1_000_000 + UInt64(info.system_time.microseconds)
+        return (userUs, sysUs)
     }
 }

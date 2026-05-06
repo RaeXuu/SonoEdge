@@ -17,7 +17,7 @@ struct BackgroundTaskService {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            print("[BackgroundTask] 调度失败: \(error)")
+            print("[BackgroundTask] Schedule failed: \(error)")
         }
     }
 

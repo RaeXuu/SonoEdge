@@ -5,7 +5,7 @@ struct AlertsList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("异常提醒")
+            Text("Alerts")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
@@ -16,7 +16,7 @@ struct AlertsList: View {
                         .font(.caption)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("检测到异常心音")
+                        Text("Abnormal heart sound detected")
                             .font(.subheadline)
                             .foregroundColor(.primary)
                         Text(alert.timestamp, style: .relative)

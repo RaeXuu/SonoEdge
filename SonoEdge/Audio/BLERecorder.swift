@@ -3,19 +3,19 @@ import CoreBluetooth
 import Combine
 
 // ================================================================
-// 对齐 Pi 端 main_pi.py BLE 采集逻辑：
-//   ESP32 电子听诊器 → BLE notification → int16 字节流 → 20s 分块
-//   内建 maxsize=1 反压队列 (推理积压时丢弃旧块)
+// Aligns with Pi main_pi.py BLE acquisition logic:
+//   ESP32 stethoscope → BLE notification → int16 byte stream → 20s chunks
+//   Built-in maxsize=1 backpressure queue (drop old chunks when inference falls behind)
 //
-// ESP32 配置 (与 Pi 端完全一致):
+// ESP32 config (identical to Pi):
 //   MAC:  AC:A7:04:85:0D:42
 //   UUID: beb5483e-36e1-4688-b7f5-ea07361b26a8
-//   数据: int16 PCM @ 2000Hz, 每 20s 一块 (80000 bytes)
+//   Data: int16 PCM @ 2000Hz, one 20s chunk (80000 bytes)
 // ================================================================
 
 final class BLERecorder: NSObject, ObservableObject {
 
-    // BLE 参数 (对齐 main_pi.py)
+    // BLE parameters (aligned with main_pi.py)
     private let serviceUUID   = CBUUID(string: "4fafc201-1fb5-459e-8fcc-c5c9c331914b")
     private let charUUIDStr   = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
     private let charUUID      = CBUUID(string: "beb5483e-36e1-4688-b7f5-ea07361b26a8")
@@ -30,17 +30,17 @@ final class BLERecorder: NSObject, ObservableObject {
     private var dataCharacteristic: CBCharacteristic?
     private var isConnected = false
 
-    // 数据缓冲
+    // Data buffer
     private var chunkBuffer = Data()
 
-    // maxsize=1 反压队列
+    // maxsize=1 backpressure queue
     private var pendingChunk: Data? = nil
     private let queueLock = NSLock()
 
-    // 回调
+    // Callback
     var onChunkReady: ((Data) -> Void)?
 
-    @Published var connectionStatus = "未连接"
+    @Published var connectionStatus = "Disconnected"
     @Published var isRunning = false
 
     override init() {
@@ -51,9 +51,9 @@ final class BLERecorder: NSObject, ObservableObject {
     // MARK: - Public
 
     func startScan() {
-        connectionStatus = "扫描中..."
+        connectionStatus = "Scanning..."
         guard centralManager.state == .poweredOn else {
-            connectionStatus = "蓝牙未开启"
+            connectionStatus = "Bluetooth is off"
             return
         }
         // Scan without service UUID filter — some ESP32 BLE stacks don't
@@ -64,7 +64,7 @@ final class BLERecorder: NSObject, ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + connectTimeout) { [weak self] in
             guard let self = self, !self.isConnected else { return }
             self.centralManager.stopScan()
-            self.connectionStatus = "连接超时"
+            self.connectionStatus = "Connection timeout"
         }
     }
 
@@ -81,10 +81,10 @@ final class BLERecorder: NSObject, ObservableObject {
         esp32Peripheral   = nil
         dataCharacteristic = nil
         chunkBuffer       = Data()
-        connectionStatus  = "已断开"
+        connectionStatus  = "Disconnected"
     }
 
-    /// 推理端消费完当前块后调用
+    /// Called by inference consumer after processing current chunk
     func markChunkConsumed() {
         queueLock.lock()
         pendingChunk = nil
@@ -92,20 +92,20 @@ final class BLERecorder: NSObject, ObservableObject {
     }
 }
 
-// MARK: - CBCentralManagerDelegate (扫描 + 连接)
+// MARK: - CBCentralManagerDelegate (scan + connect)
 
 extension BLERecorder: CBCentralManagerDelegate {
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            connectionStatus = "蓝牙就绪"
+            connectionStatus = "Bluetooth Ready"
         case .poweredOff:
-            connectionStatus = "蓝牙已关闭"
+            connectionStatus = "Bluetooth Off"
         case .unauthorized:
-            connectionStatus = "蓝牙未授权"
+            connectionStatus = "Bluetooth Unauthorized"
         default:
-            connectionStatus = "蓝牙状态: \(central.state.rawValue)"
+            connectionStatus = "Bluetooth State: \(central.state.rawValue)"
         }
     }
 
@@ -115,7 +115,7 @@ extension BLERecorder: CBCentralManagerDelegate {
                         rssi RSSI: NSNumber) {
         let name = peripheral.name ?? "(unnamed)"
 
-        print("[BLE] 发现设备: name=\(name) id=\(peripheral.identifier.uuidString)")
+        print("[BLE] Discovered device: name=\(name) id=\(peripheral.identifier.uuidString)")
 
         guard name == "ESP32_Steth" else { return }
 
@@ -124,13 +124,13 @@ extension BLERecorder: CBCentralManagerDelegate {
         esp32Peripheral = peripheral
         peripheral.delegate = self
         centralManager.connect(peripheral, options: nil)
-        connectionStatus = "连接中..."
+        connectionStatus = "Connecting..."
     }
 
     func centralManager(_ central: CBCentralManager,
                         didConnect peripheral: CBPeripheral) {
         isConnected = true
-        connectionStatus = "已连接, 搜索服务..."
+        connectionStatus = "Connected, discovering services..."
         peripheral.discoverServices([serviceUUID])
     }
 
@@ -141,22 +141,22 @@ extension BLERecorder: CBCentralManagerDelegate {
         esp32Peripheral   = nil
         dataCharacteristic = nil
         isRunning         = false
-        connectionStatus  = error.map { "断开: \($0.localizedDescription)" } ?? "已断开"
+        connectionStatus  = error.map { "Disconnected: \($0.localizedDescription)" } ?? "Disconnected"
     }
 }
 
-// MARK: - CBPeripheralDelegate (服务 + 特征 + 数据通知)
+// MARK: - CBPeripheralDelegate (services + characteristics + data notifications)
 
 extension BLERecorder: CBPeripheralDelegate {
 
     func peripheral(_ peripheral: CBPeripheral,
                     didDiscoverServices error: Error?) {
         if let e = error {
-            connectionStatus = "服务发现失败: \(e.localizedDescription)"
+            connectionStatus = "Service discovery failed: \(e.localizedDescription)"
             return
         }
         guard let svc = peripheral.services?.first else {
-            connectionStatus = "未找到目标服务"
+            connectionStatus = "Target service not found"
             return
         }
         peripheral.discoverCharacteristics([charUUID], for: svc)
@@ -166,27 +166,27 @@ extension BLERecorder: CBPeripheralDelegate {
                     didDiscoverCharacteristicsFor service: CBService,
                     error: Error?) {
         if let e = error {
-            connectionStatus = "特征发现失败: \(e.localizedDescription)"
+            connectionStatus = "Characteristic discovery failed: \(e.localizedDescription)"
             return
         }
         guard let chr = service.characteristics?.first(
             where: { $0.uuid.uuidString.caseInsensitiveCompare(charUUIDStr) == .orderedSame }
         ) else {
-            // Fallback: 取第一个 notify 属性特征
+            // Fallback: use first characteristic with notify property
             guard let fallback = service.characteristics?.first(
                 where: { $0.properties.contains(.notify) }
             ) else {
-                connectionStatus = "未找到 notify 特征"
+                connectionStatus = "Notify characteristic not found"
                 return
             }
             dataCharacteristic = fallback
             peripheral.setNotifyValue(true, for: fallback)
-            connectionStatus = "已订阅通知 (fallback)"
+            connectionStatus = "Subscribed to notifications (fallback)"
             return
         }
         dataCharacteristic = chr
         peripheral.setNotifyValue(true, for: chr)
-        connectionStatus = "已连接, 等待数据流..."
+        connectionStatus = "Connected, waiting for data stream..."
     }
 
     func peripheral(_ peripheral: CBPeripheral,
@@ -196,7 +196,7 @@ extension BLERecorder: CBPeripheralDelegate {
 
         if !isRunning {
             isRunning = true
-            connectionStatus = "采集中..."
+            connectionStatus = "Collecting..."
         }
 
         chunkBuffer.append(data)
@@ -212,7 +212,7 @@ extension BLERecorder: CBPeripheralDelegate {
                     didUpdateNotificationStateFor characteristic: CBCharacteristic,
                     error: Error?) {
         if let e = error {
-            connectionStatus = "订阅失败: \(e.localizedDescription)"
+            connectionStatus = "Subscribe failed: \(e.localizedDescription)"
         }
     }
 }
@@ -224,7 +224,7 @@ private extension BLERecorder {
     func enqueueChunk(_ chunk: Data) {
         queueLock.lock()
         if pendingChunk != nil {
-            print("[BLE] 推理积压，丢弃旧块")
+            print("[BLE] Inference backlog, dropping old chunk")
         }
         pendingChunk = chunk
         let latest = chunk

@@ -2,16 +2,16 @@ import Foundation
 import Accelerate
 
 // ================================================================
-// 对齐 Pi 端 main_pi.py 的 run_inference() 双阶段流式推理流水线：
-//   SQA 门控 (阈值 0.65) → 诊断推理 → 加权平均
-//   逐窗口驱动进度回调，实现流式 UI 更新
+// Aligns with Pi main_pi.py run_inference() two-stage streaming pipeline:
+//   SQA gate (threshold 0.65) → diagnosis inference → weighted average
+//   Per-window progress callbacks for streaming UI updates
 //
-// 索引约定:
-//   SQA 模型 : index 0 = Good, index 1 = Poor
-//   诊断模型: index 0 = Normal, index 1 = Abnormal
+// Index convention:
+//   SQA model:  index 0 = Good, index 1 = Poor
+//   Diag model:  index 0 = Normal, index 1 = Abnormal
 // ================================================================
 
-// MARK: - 类型定义
+// MARK: - Type definitions
 
 struct WindowResult: Equatable {
     let windowIndex: Int
@@ -29,10 +29,10 @@ struct ChunkResult {
     let inferenceMs: Double
 }
 
-/// 每处理完一个窗口时回调
-/// - runningAvgNormal: 截止当前窗口的加权平均 P(Normal), nil 表示尚无有效窗口
-/// - currentWindow: 当前窗口编号 (1-based)
-/// - totalWindows: 总窗口数
+/// Callback after each window is processed
+/// - runningAvgNormal: Weighted average P(Normal) up to current window, nil means no valid windows yet
+/// - currentWindow: Current window index (1-based)
+/// - totalWindows: Total number of windows
 typealias WindowProgressCallback = (
     _ runningAvgNormal: Float?,
     _ currentWindow: Int,
@@ -40,7 +40,7 @@ typealias WindowProgressCallback = (
     _ latestResult: WindowResult
 ) async -> Void
 
-// MARK: - 流水线
+// MARK: - Pipeline
 
 final class InferencePipeline {
 
@@ -59,17 +59,17 @@ final class InferencePipeline {
         self.diagEngine = diagEngine
     }
 
-    // MARK: - 入口
+    // MARK: - Entry
 
-    /// 对一块 int16 raw bytes 做双阶段流式推理
+    /// Two-stage streaming inference on a chunk of int16 raw bytes
     /// - Parameters:
     ///   - rawBytes: int16 PCM @ 2000Hz, 20s (80000 bytes)
-    ///   - onWindow: 每处理完一个窗口时回调 (non-nil即可启用逐窗进度)
+    ///   - onWindow: Callback after each window (non-nil enables per-window progress)
     func run(on rawBytes: Data,
              onWindow: WindowProgressCallback? = nil) async throws -> ChunkResult {
         let t0 = CFAbsoluteTimeGetCurrent()
 
-        // 1. int16 → float32 / 32768.0 (对齐 main_pi.py:129)
+        // 1. int16 → float32 / 32768.0 (aligns with main_pi.py:129)
         var audio = rawBytes.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> [Float] in
             let intPtr = ptr.bindMemory(to: Int16.self)
             let count = min(rawBytes.count / 2, chunkSamples)
@@ -81,10 +81,10 @@ final class InferencePipeline {
                                              count: chunkSamples - audio.count))
         }
 
-        // 2. 带通滤波 (整块一次)
+        // 2. Bandpass filter (whole chunk at once)
         let filtered = ButterworthBandpass.apply(to: audio)
 
-        // 3. 滑动窗口 + 流式推理
+        // 3. Sliding windows + streaming inference
         var validResults = [(sqa: Float, normal: Float)]()
         var windowDetails = [WindowResult]()
         let totalWindows = (chunkSamples - segSamples) / hopSamples + 1  // 19
@@ -93,10 +93,10 @@ final class InferencePipeline {
             let start = winIdx * hopSamples
             let window = Array(filtered[start..<start + segSamples])
 
-            // Mel 频谱 (64×64 → 展平 4096, 内含峰值归一化)
+            // Mel spectrogram (64×64 → flattened to 4096, includes peak normalization)
             let mel = MelSpectrogram.compute(from: window)
 
-            // SQA 推理
+            // SQA inference
             let sqaRaw = try sqaEngine.infer(floatInput: mel)
             let sqaProbs = softmax(sqaRaw)
             let sqaScore = sqaProbs[0]
@@ -109,7 +109,7 @@ final class InferencePipeline {
                                      passedSQA: false, probNormal: nil)
                 windowDetails.append(r)
 
-                // 进度回调: 加权平均保持不变
+                // Progress callback: weighted average unchanged
                 let runningAvg: Float? = validResults.isEmpty ? nil : {
                     let w = validResults.map { $0.sqa }
                     let p = validResults.map { $0.normal }
@@ -119,7 +119,7 @@ final class InferencePipeline {
                 continue
             }
 
-            // 诊断推理
+            // Diagnosis inference
             let diagRaw = try diagEngine.infer(floatInput: mel)
             let diagProbs = softmax(diagRaw)
             let probNormal = diagProbs[0]
@@ -130,7 +130,7 @@ final class InferencePipeline {
                                  passedSQA: true, probNormal: probNormal)
             windowDetails.append(r)
 
-            // 计算当前累计加权平均
+            // Compute current cumulative weighted average
             let w = validResults.map { $0.sqa }
             let p = validResults.map { $0.normal }
             let runningAvg = zip(w, p).reduce(0) { $0 + $1.0 * $1.1 } / w.reduce(0, +)

@@ -10,7 +10,7 @@ struct NotificationService {
             return try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])
         } catch {
-            print("[Notification] 授权失败: \(error)")
+            print("[Notification] Authorization failed: \(error)")
             return false
         }
     }
@@ -22,8 +22,8 @@ struct NotificationService {
         guard settings.authorizationStatus == .authorized else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "心律异常检测"
-        content.body = String(format: "检测到异常心音信号 (置信度: %.0f%%)。请查看详情。", (1 - probNormal) * 100)
+        content.title = "Abnormal Heart Rhythm Detected"
+        content.body = String(format: "Abnormal heart sound detected (confidence: %.0f%%). Please check details.", (1 - probNormal) * 100)
         content.sound = .default
         content.badge = 1
 
@@ -36,7 +36,7 @@ struct NotificationService {
         do {
             try await center.add(request)
         } catch {
-            print("[Notification] 发送失败: \(error)")
+            print("[Notification] Send failed: \(error)")
         }
     }
 

@@ -6,7 +6,7 @@ struct HistoryView: View {
     @State private var filter: HistoryFilter = .all
 
     enum HistoryFilter: String, CaseIterable {
-        case all = "全部"
+        case all = "All"
         case normal = "Normal"
         case abnormal = "Abnormal"
         case noise = "Noise"
@@ -32,7 +32,7 @@ struct HistoryView: View {
                         Image(systemName: "tray")
                             .font(.system(size: 40))
                             .foregroundColor(.secondary)
-                        Text("暂无记录")
+                        Text("No Records")
                             .foregroundColor(.secondary)
                     }
                     Spacer()
@@ -50,7 +50,7 @@ struct HistoryView: View {
                     .listStyle(.insetGrouped)
                 }
             }
-            .navigationTitle("记录")
+            .navigationTitle("History")
             .onAppear { reload() }
             .onChange(of: service.totalNormal) { _ in reload() }
             .onChange(of: service.totalAbnormal) { _ in reload() }
@@ -88,7 +88,7 @@ struct HistoryView: View {
                         .foregroundColor(.secondary)
                 }
                 if let label = r["label"] as? String {
-                    Text(label == "noise" ? "低质量信号" : (label == "Normal" ? "正常" : "异常"))
+                    Text(label == "noise" ? "Poor Quality Signal" : (label == "Normal" ? "Normal" : "Abnormal"))
                         .font(.headline)
                         .foregroundColor(labelColor(label))
                 }

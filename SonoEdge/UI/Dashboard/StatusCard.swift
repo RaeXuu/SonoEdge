@@ -55,19 +55,19 @@ struct StatusCard: View {
     }
 
     private var statusTitle: String {
-        if !service.isConnected { return "未连接" }
-        if service.isProcessingChunk { return "监测中..." }
-        guard let label = service.lastLabel else { return "等待数据" }
-        return label == "Normal" ? "心率正常" : "心率异常"
+        if !service.isConnected { return "Disconnected" }
+        if service.isProcessingChunk { return "Monitoring..." }
+        guard let label = service.lastLabel else { return "Waiting for Data" }
+        return label == "Normal" ? "Heart Rate Normal" : "Heart Rate Abnormal"
     }
 
     private var statusSubtitle: String {
-        if !service.isConnected { return "轻触下方按钮连接设备" }
-        if service.isProcessingChunk { return "正在分析心音信号..." }
+        if !service.isConnected { return "Tap the button below to connect" }
+        if service.isProcessingChunk { return "Analyzing heart sound signals..." }
         guard let label = service.lastLabel, let prob = service.lastProbNormal else {
-            return "暂无检测数据"
+            return "No detection data available"
         }
         let confidence = label == "Normal" ? prob : 1 - prob
-        return String(format: "置信度: %.0f%% · 上次: \(service.lastInferenceMs.map { String(format: "%.0fms", $0) } ?? "--")", confidence * 100)
+        return String(format: "Confidence: %.0f%% · Last: \(service.lastInferenceMs.map { String(format: "%.0fms", $0) } ?? "--")", confidence * 100)
     }
 }

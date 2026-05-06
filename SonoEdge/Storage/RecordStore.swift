@@ -1,7 +1,7 @@
 import Foundation
 
-/// 对齐 Pi 端 src/storage/summary.py 的 append_summary
-/// JSONL 格式，每条记录一行
+/// Aligns with Pi src/storage/summary.py append_summary
+/// JSONL format, one record per line
 struct RecordStore {
 
     private static let fileManager = FileManager.default
@@ -19,7 +19,7 @@ struct RecordStore {
 
     // MARK: - Summary (JSONL)
 
-    /// 每块推理完成后追加一行到 records/summary.jsonl
+    /// Append one line to records/summary.jsonl after each chunk inference
     static func appendSummary(label: String?,
                               probNormal: Float?,
                               validSegs: Int,
@@ -47,7 +47,7 @@ struct RecordStore {
         }
     }
 
-    /// 加载所有记录，用于"记录"tab 展示
+    /// Load all records for display in the History tab
     static func loadSummaries() -> [[String: Any]] {
         guard let content = try? String(contentsOf: summaryPath, encoding: .utf8) else { return [] }
         return content
@@ -66,7 +66,7 @@ struct RecordStore {
         if !fileManager.fileExists(atPath: recordsDir.path) {
             try? fileManager.createDirectory(at: recordsDir,
                                              withIntermediateDirectories: true)
-            // 标记不备份到 iCloud
+            // Mark as excluded from iCloud backup
             var values = URLResourceValues()
             values.isExcludedFromBackup = true
             var url = recordsDir

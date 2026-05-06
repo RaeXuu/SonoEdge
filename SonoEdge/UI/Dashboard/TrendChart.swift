@@ -5,7 +5,7 @@ struct TrendChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("最近趋势")
+            Text("Recent Trends")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
@@ -16,7 +16,7 @@ struct TrendChart: View {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                             .font(.title2)
                             .foregroundColor(.secondary.opacity(0.5))
-                        Text("开始监测后显示24小时趋势")
+                        Text("Start monitoring to see 24-hour trends")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -78,7 +78,7 @@ struct TrendChart: View {
 
                 if let last = readings.last {
                     HStack {
-                        Text("过去24小时")
+                        Text("Past 24 Hours")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                         Spacer()

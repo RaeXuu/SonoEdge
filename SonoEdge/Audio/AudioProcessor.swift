@@ -2,15 +2,15 @@ import Foundation
 import Accelerate
 
 // ================================================================
-// 对齐 Pi 端预处理流水线：
+// Aligns with Pi preprocessing pipeline:
 //   load_wav → apply_bandpass → segment_audio → normalize → logmel_fixed_size
 //
-// 对应 config.yaml:
+// Corresponds to config.yaml:
 //   sr=2000  seg=2.0s  overlap=0.5  bp=25-400Hz
 //   mel: n_fft=256  win=256  hop=128  n_mels=64  fmin=25  fmax=400  power=2.0
 // ================================================================
 
-// MARK: - 常量
+// MARK: - Constants
 
 private let kSampleRate: Float    = 2000.0
 private let kSegSeconds: Float    = 2.0
@@ -28,8 +28,8 @@ private let kMelTargetFrames: Int  = 64
 private let kMelPower: Float       = 2.0
 private let kMelEps: Float         = 1e-6
 
-// MARK: - Butterworth 带通滤波器 (order=5, 25-400Hz, zero-phase)
-// 对齐 Pi: scipy.signal.butter(5, [25/1000, 400/1000], btype='band', output='ba') + filtfilt
+// MARK: - Butterworth bandpass filter (order=5, 25-400Hz, zero-phase)
+// Aligns with Pi: scipy.signal.butter(5, [25/1000, 400/1000], btype='band', output='ba') + filtfilt
 
 struct ButterworthBandpass {
 
@@ -129,10 +129,10 @@ struct ButterworthBandpass {
     }
 }
 
-// MARK: - 音频分段 (对齐 segment_audio)
+// MARK: - Audio segmentation (aligned with segment_audio)
 
 struct AudioSegments {
-    /// 按 seg=2.0s, overlap=0.5 滑动切片
+    /// Sliding window segmentation with seg=2.0s, overlap=0.5
     static func extract(from signal: [Float]) -> [[Float]] {
         var segs = [[Float]]()
         var start = 0
@@ -145,11 +145,11 @@ struct AudioSegments {
     }
 }
 
-// MARK: - Log-Mel 频谱 (对齐 librosa melspectrogram + power_to_db + fix_length)
+// MARK: - Log-Mel spectrogram (aligned with librosa melspectrogram + power_to_db + fix_length)
 
 struct MelSpectrogram {
 
-    /// 单窗口 → (64×64) log-mel 频谱展平为 [Float]
+    /// Single window → (64×64) log-mel spectrogram flattened to [Float]
     /// Params match config.yaml + librosa defaults (center=True, hann window)
     static func compute(from window: [Float]) -> [Float] {
         // 1. peak normalize (per-window, as in main_pi.py)

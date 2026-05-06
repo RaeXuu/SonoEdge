@@ -29,13 +29,13 @@ struct DashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("重置") { service.resetTally() }
+                    Button("Reset") { service.resetTally() }
                         .font(.caption)
                 }
             }
             .onAppear {
                 do { try service.setup() }
-                catch { service.connectionStatus = "模型加载失败: \(error.localizedDescription)" }
+                catch { service.connectionStatus = "Model load failed: \(error.localizedDescription)" }
                 NotificationService.clearBadge()
             }
         }
@@ -52,7 +52,7 @@ struct DashboardView: View {
             HStack {
                 Image(systemName: service.isConnected ? "stop.circle.fill" : "play.circle.fill")
                     .font(.title2)
-                Text(service.isConnected ? "停止监测" : "开始监测")
+                Text(service.isConnected ? "Stop Monitoring" : "Start Monitoring")
                     .font(.headline)
             }
             .foregroundColor(.white)
@@ -69,7 +69,7 @@ struct DashboardView: View {
             HStack {
                 ProgressView()
                     .scaleEffect(0.8)
-                Text("分析中...")
+                Text("Analyzing...")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 Spacer()

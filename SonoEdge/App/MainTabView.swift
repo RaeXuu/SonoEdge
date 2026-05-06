@@ -9,21 +9,21 @@ struct MainTabView: View {
             DashboardView(service: service)
                 .tabItem {
                     Image(systemName: "heart.fill")
-                    Text("监测")
+                    Text("Monitor")
                 }
                 .tag(0)
 
             HistoryView(service: service)
                 .tabItem {
                     Image(systemName: "clock.arrow.circlepath")
-                    Text("记录")
+                    Text("History")
                 }
                 .tag(1)
 
             SettingsView(service: service)
                 .tabItem {
                     Image(systemName: "person.circle")
-                    Text("设置")
+                    Text("Settings")
                 }
                 .tag(2)
         }

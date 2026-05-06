@@ -7,15 +7,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section("设备") {
+                Section("Device") {
                     HStack {
-                        Label("电子听诊器贴片", systemImage: "wave.3.right")
+                        Label("Stethoscope Patch", systemImage: "wave.3.right")
                         Spacer()
                         HStack(spacing: 4) {
                             Circle()
                                 .fill(service.isConnected ? Color.green : Color.gray)
                                 .frame(width: 6, height: 6)
-                            Text(service.isConnected ? "已连接" : "未连接")
+                            Text(service.isConnected ? "Connected" : "Disconnected")
                                 .foregroundColor(service.isConnected ? .green : .secondary)
                         }
                         .font(.subheadline)
@@ -23,7 +23,7 @@ struct SettingsView: View {
 
                     if service.isConnected {
                         HStack {
-                            Label("采集状态", systemImage: "antenna.radiowaves.left.and.right")
+                            Label("Collection Status", systemImage: "antenna.radiowaves.left.and.right")
                             Spacer()
                             Text(service.connectionStatus)
                                 .font(.subheadline)
@@ -32,14 +32,14 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("异常提醒") {
+                Section("Alert Settings") {
                     Toggle(isOn: $alertsEnabled) {
-                        Label("推送通知", systemImage: "bell.fill")
+                        Label("Push Notifications", systemImage: "bell.fill")
                     }
 
                     if alertsEnabled {
                         HStack {
-                            Label("检测阈值", systemImage: "slider.horizontal.3")
+                            Label("Detection Threshold", systemImage: "slider.horizontal.3")
                             Spacer()
                             Text("P(Normal) < 0.5")
                                 .font(.caption)
@@ -48,25 +48,25 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("数据分享") {
+                Section("Data Sharing") {
                     Button(action: shareReport) {
-                        Label("分享给医生", systemImage: "square.and.arrow.up")
+                        Label("Share with Doctor", systemImage: "square.and.arrow.up")
                     }
                 }
 
-                Section("关于") {
-                    Label("版本 1.0", systemImage: "info.circle")
+                Section("About") {
+                    Label("Version 1.0", systemImage: "info.circle")
                     Label("SonoEdge Health Monitor", systemImage: "heart.text.square")
                 }
             }
-            .navigationTitle("设置")
+            .navigationTitle("Settings")
             .listStyle(.insetGrouped)
         }
     }
 
     private func shareReport() {
         let records = RecordStore.loadSummaries()
-        var text = "SonoEdge 心音监测报告\n\n"
+        var text = "SonoEdge Heart Sound Monitoring Report\n\n"
         for r in records.prefix(50) {
             let ts = r["ts"] as? String ?? ""
             let label = r["label"] as? String ?? ""

@@ -8,12 +8,12 @@ final class MonitoringService: ObservableObject {
 
     // MARK: - Published state
 
-    @Published var connectionStatus = "未连接"
+    @Published var connectionStatus = "Disconnected"
     @Published var isConnected = false
     @Published var isMonitoring = false
     @Published var isProcessingChunk = false
 
-    @Published var currentStatusText = "就绪"
+    @Published var currentStatusText = "Ready"
     @Published var lastLabel: String? = nil
     @Published var lastProbNormal: Float? = nil
     @Published var lastInferenceMs: Double? = nil
@@ -36,10 +36,13 @@ final class MonitoringService: ObservableObject {
     private var pipeline: InferencePipeline?
     private let modelDir = Bundle.main.resourcePath!
     private var alerts: [AlertItem] = []
+    private var isSetup = false
 
     // MARK: - Setup
 
     func setup() throws {
+        guard !isSetup else { return }
+        isSetup = true
         let sqaPath  = modelDir + "/heart_quality_int8full.tflite"
         let diagPath = modelDir + "/heart_model_int8full.tflite"
 
@@ -49,7 +52,18 @@ final class MonitoringService: ObservableObject {
         try sqa.warmup(count: 5)
         try diag.warmup(count: 5)
 
+        #if DEBUG
+        try sqa.benchmark(iterations: 100)
+        try diag.benchmark(iterations: 100)
+        try sqa.benchmarkSingleThread(iterations: 100)
+        try diag.benchmarkSingleThread(iterations: 100)
+        #endif
+
         pipeline = InferencePipeline(sqaEngine: sqa, diagEngine: diag)
+
+        // #if DEBUG — Energy Log commented out: was blocking main actor for 60s on every launch.
+        // Uncomment only when profiling inference performance without a BLE device.
+        // Task { [weak self] in ... }
 
         bleRecorder = BLERecorder()
         bleRecorder?.onChunkReady = { [weak self] rawChunk in
@@ -72,7 +86,7 @@ final class MonitoringService: ObservableObject {
         bleRecorder?.disconnect()
         isConnected = false
         isMonitoring = false
-        currentStatusText = "已断开"
+        currentStatusText = "Disconnected"
         isProcessingChunk = false
     }
 
@@ -100,7 +114,7 @@ final class MonitoringService: ObservableObject {
                         let label = avg > 0.5 ? "Normal" : "Abnormal"
                         self.currentStatusText = "W\(win)/\(total) | \(label) \(String(format: "%.1f", avg * 100))%"
                     } else {
-                        self.currentStatusText = "W\(win)/\(total) | 等待有效窗口..."
+                        self.currentStatusText = "W\(win)/\(total) | Waiting for valid window..."
                     }
                 }
             }
@@ -139,7 +153,7 @@ final class MonitoringService: ObservableObject {
                 self.lastLabel = nil
                 self.lastProbNormal = nil
                 self.totalNoise += 1
-                self.currentStatusText = "低质量 (\(result.validWindows)/\(result.totalWindows) 窗口)"
+                self.currentStatusText = "Low quality (\(result.validWindows)/\(result.totalWindows) windows)"
             }
 
             RecordStore.appendSummary(label: result.label,
@@ -149,7 +163,7 @@ final class MonitoringService: ObservableObject {
 
             self.isProcessingChunk = false
         } catch {
-            self.currentStatusText = "推理错误: \(error.localizedDescription)"
+            self.currentStatusText = "Inference error: \(error.localizedDescription)"
             self.isProcessingChunk = false
         }
 
