@@ -1,8 +1,22 @@
-# 🫀 SonoEdge
+<p align="center">
+  <img src="assets/media/sonoedge-logo.jpeg" width="180" alt="SonoEdge app logo">
+</p>
 
-> On-device heart sound AI — real-time inference on iPhone via BLE stethoscope.
+<h1 align="center">🫀 SonoEdge</h1>
+
+<p align="center"><strong>On-device heart sound AI — real-time inference on iPhone via BLE stethoscope.</strong></p>
 
 SonoEdge runs a two-stage INT8 TFLite pipeline on iPhone to classify heart sounds (Normal / Abnormal) streamed from an ESP32 BLE stethoscope. No cloud, no latency, fully on-device.
+
+## 🎬 Demo
+
+<p align="center">
+  <a href="assets/media/sonoedge-demo.mp4">
+    <img src="assets/media/sonoedge-demo-preview.png" width="320" alt="SonoEdge app demo preview">
+  </a>
+</p>
+
+<p align="center"><a href="assets/media/sonoedge-demo.mp4">▶ Watch the full app demo (MP4)</a></p>
 
 ## 🧠 How It Works
 
